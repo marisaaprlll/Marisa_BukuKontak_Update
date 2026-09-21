@@ -1,19 +1,23 @@
-// Model sederhana untuk satu data kontak
+// Model untuk data kontak Firestore
 class Kontak {
-  final String nama;
-  final String email;
-  final String noHp;
+  String id;
+  String nama;
+  String email;
+  String noHandphone;
   String? kategori;
 
-  String get inisialNamaDepan {
-    final namaBersih = nama.trim();
-    return namaBersih.isNotEmpty ? namaBersih[0].toUpperCase() : '?';
-  }
-
   Kontak({
+    this.id = '',
     required this.nama,
     required this.email,
-    required this.noHp,
+    required this.noHandphone,
     this.kategori,
   });
+
+  String get inisial => nama.isNotEmpty ? nama[0].toUpperCase() : '?';
+
+  // Kompatibilitas dengan kode sebelumnya
+  String get noHp => noHandphone;
+  String get inisialNamaDepan => inisial;
 }
+

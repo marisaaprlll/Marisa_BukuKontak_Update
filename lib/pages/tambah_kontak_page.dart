@@ -1,12 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/kontak.dart';
 
-// Halaman Tambah Kontak
-// Berisi form (Nama Lengkap, Email, No. Handphone) dan tombol Simpan.
-// Ketika Simpan ditekan, data kontak dikirim kembali ke Halaman Kontak
-// menggunakan Navigator.pop(context, kontakBaru).
+// Halaman Tambah & Edit Kontak
+// Berisi form (Nama Lengkap, Email, No. Handphone, Kategori) dan tombol Simpan.
+// Menyimpan data kontak langsung ke database Cloud Firestore.
 class TambahKontakPage extends StatefulWidget {
-  const TambahKontakPage({super.key});
+  final Kontak? kontak;
+
+  const TambahKontakPage({
+    super.key,
+    this.kontak,
+  });
 
   @override
   State<TambahKontakPage> createState() => _TambahKontakPageState();
@@ -17,39 +22,89 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
 
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _noHpController = TextEditingController();
+  final TextEditingController _noHandphoneController = TextEditingController();
   final TextEditingController _kategoriController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.kontak != null) {
+      _namaController.text = widget.kontak!.nama;
+      _emailController.text = widget.kontak!.email;
+      _noHandphoneController.text = widget.kontak!.noHandphone;
+      _kategoriController.text = widget.kontak!.kategori ?? '';
+    }
+  }
 
   @override
   void dispose() {
     _namaController.dispose();
     _emailController.dispose();
-    _noHpController.dispose();
+    _noHandphoneController.dispose();
     _kategoriController.dispose();
     super.dispose();
   }
 
-  void _simpanKontak() {
-    final kontakBaru = Kontak(
-      nama: _namaController.text.trim(),
-      email: _emailController.text.trim(),
-      noHp: _noHpController.text.trim(),
-      kategori: _kategoriController.text.trim().isEmpty
-          ? null
-          : _kategoriController.text.trim(),
-    );
+  // FUNGSI SIMPAN KONTAK KE DATABASE FIRESTORE
+  Future<void> _simpanKontak() async {
+    try {
+      if (widget.kontak != null && widget.kontak!.id.isNotEmpty) {
+        // Mode edit kontak yang sudah ada
+        await FirebaseFirestore.instance
+            .collection('kontak')
+            .doc(widget.kontak!.id)
+            .update({
+          'nama': _namaController.text,
+          'email': _emailController.text,
+          'noHandphone': _noHandphoneController.text,
+          'kategori': _kategoriController.text.isEmpty
+              ? null
+              : _kategoriController.text,
+        });
+      } else {
+        // Mode tambah kontak baru ke Firestore
+        await FirebaseFirestore.instance.collection('kontak').add({
+          'nama': _namaController.text,
+          'email': _emailController.text,
+          'noHandphone': _noHandphoneController.text,
+          'kategori': _kategoriController.text.isEmpty
+              ? null
+              : _kategoriController.text,
+        });
+      }
 
-    // Kirim data kontak baru kembali ke Halaman Kontak
-    Navigator.pop(context, kontakBaru);
+      // Bersihkan form
+      _namaController.clear();
+      _emailController.clear();
+      _noHandphoneController.clear();
+      _kategoriController.clear();
+
+      if (!mounted) return;
+
+      // Tampilkan SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data berhasil disimpan'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menyimpan kontak: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEdit = widget.kontak != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Kontak'),
+        title: Text(isEdit ? 'Edit Kontak' : 'Tambah Kontak'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -91,7 +146,7 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
               ),
               const SizedBox(height: 12),
               TextFormField(
-                controller: _noHpController,
+                controller: _noHandphoneController,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'No. Handphone',
@@ -129,7 +184,7 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                   }
                 },
                 icon: const Icon(Icons.save),
-                label: const Text('Simpan'),
+                label: Text(isEdit ? 'Simpan Perubahan' : 'Simpan'),
               ),
             ],
           ),

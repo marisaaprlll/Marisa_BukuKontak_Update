@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import '../models/kontak.dart';
 import 'kontak_page.dart';
 import 'favorit_page.dart';
 import 'tentang_page.dart';
@@ -18,11 +15,6 @@ class _BerandaPageState extends State<BerandaPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  // Data kontak disimpan di sini agar tetap sama saat berpindah tab
-  final List<Kontak> _daftarKontak = [];
-  final StreamController<String> _searchController =
-      StreamController<String>.broadcast();
-
   static const int _tabKontak = 0;
   static const int _tabFavorit = 1;
 
@@ -37,30 +29,15 @@ class _BerandaPageState extends State<BerandaPage>
   @override
   void dispose() {
     _tabController.dispose();
-    _searchController.close();
     super.dispose();
   }
 
-  // Membuka Halaman Tambah Kontak, lalu menerima data kontak baru
-  // yang dikirim kembali lewat Navigator.pop(context, kontakBaru)
+  // Membuka Halaman Tambah Kontak
   Future<void> _bukaTambahKontak() async {
-    final kontakBaru = await Navigator.push<Kontak>(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const TambahKontakPage()),
     );
-
-    if (kontakBaru != null) {
-      setState(() {
-        _daftarKontak.add(kontakBaru);
-        _tabController.index = _tabKontak; // kembali ke tab Kontak
-      });
-    }
-  }
-
-  void _hapusKontak(int index) {
-    setState(() {
-      _daftarKontak.removeAt(index);
-    });
   }
 
   // Membuka Halaman Tentang (profil diri)
@@ -126,8 +103,8 @@ class _BerandaPageState extends State<BerandaPage>
               onTap: () => _pilihMenuDrawer(_tabKontak),
             ),
             ListTile(
-              leading: CircleAvatar(
-                child: const Icon(Icons.person_add),
+              leading: const CircleAvatar(
+                child: Icon(Icons.person_add),
               ),
               title: const Text('Tambah Kontak'),
               onTap: () => _pilihMenuDrawer(-1),
@@ -147,14 +124,9 @@ class _BerandaPageState extends State<BerandaPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: <Widget>[
-          KontakPage(
-            daftarKontak: _daftarKontak,
-            onHapus: _hapusKontak,
-            searchStream: _searchController.stream,
-            onSearchChanged: (teks) => _searchController.add(teks),
-          ),
-          const FavoritPage(),
+        children: const <Widget>[
+          KontakPage(),
+          FavoritPage(),
         ],
       ),
       // FloatingActionButton hanya ditampilkan di tab Kontak

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "798139723674",
+    "project_id": "buku-kontak-b8de1",
+    "storage_bucket": "buku-kontak-b8de1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798139723674:android:b08e9b39ba04a186925423",
+        "android_client_info": {
+          "package_name": "com.example.kontak_form"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5ks2itoY8vQqyiFe2t8uOFabFihnu6vQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
