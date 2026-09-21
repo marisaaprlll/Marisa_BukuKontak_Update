@@ -89,10 +89,8 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
         ),
       );
 
-      // Jika dalam mode edit, otomatis kembali ke halaman utama
-      if (widget.kontak != null) {
-        Navigator.pop(context);
-      }
+      // Otomatis kembali ke halaman utama
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
